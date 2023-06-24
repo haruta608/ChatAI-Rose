@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-
+    <meta charset="UTF-8" />
+    <title>chatBot</title>
+    <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/osql.js"></script>
-    <link rel="stylesheet" href="style.css">
-
-    <title>ログイン</title>
-    <!-- 不要の可能性とてもあり -->
     <script>
         osql.requireLogin();
 
@@ -26,10 +22,224 @@
 </head>
 
 <body>
-    <div class="wrapper">
-        <h1>トップページ</h1>
-        <button onclick="login()">ログイン</button>
+    <h1>チャット画面</h1>
+
+    <!--画面-->
+    <div id="field">
+        <ul id="chat-ul"></ul>
     </div>
+
+    <!--入力場所，送信ボタン-->
+    <div id="input-field">
+        <textarea id="chat-input" cols="50" rows="5"></textarea>
+        <input type="button" value="Send" id="chat-button" onclick="chatbtn()">
+    </div>
+
+
+    <!-- chatGPTの呼び出し -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <!-- <script src="chatstyle.js"></script> -->
+
+    <script>
+        // ユーザーの取得
+        async function getUser() {
+            var me = await osql.getMe();
+            console.log(me);
+            var studentid = me.studentid;
+            // var name = me.fname;
+            return studentid
+        }
+
+        function createSessionid() {
+
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (a) {
+                let r = (new Date().getTime() + Math.random() * 16) % 16 | 0,
+                    v = a == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+
+        }
+        var sessionid = createSessionid()
+        console.log(sessionid);
+        // 自分の質問・chatGPTの返答をリスト表示していく
+        function output(text, person) {
+
+            const field = document.getElementById('field');
+            field.scroll(0, field.scrollHeight - field.clientHeight);
+
+            const ul = document.getElementById('chat-ul');
+            const li = document.createElement('li');
+
+            const div = document.createElement('div');
+            console.log(text)
+            // ```の間を取得してコードブロックにする。できていない
+            // const codeRegex = /```([\s\S]+?)```/;
+            // const matches = text.match(codeRegex);
+
+            // if (matches) {
+            //     const codeBlock = matches[1];
+            //     const startIndex = matches.index;
+            //     const endIndex = startIndex + matches[0].length;
+            //     const beforeText = text.substring(0, startIndex);
+            //     const afterText = text.substring(endIndex);
+
+            //     console.log("コードブロックの前のテキスト:");
+            //     console.log(beforeText);
+            //     console.log("コードブロック:");
+            //     console.log(codeBlock);
+            //     console.log("コードブロックの後のテキスト:");
+            //     console.log(afterText);
+            //     div.textContent = beforeText + codeBlock + afterText;
+            // } else {
+            //     div.textContent = text;
+            // }
+            div.textContent = text;
+
+            if (person === 'me') {
+                div.classList.add('chat-right');
+                li.classList.add('right');
+                ul.appendChild(li);
+                li.appendChild(div);
+            } else if (person === 'other') {
+                // chatBtn.disabled = true;
+                // chatBtn.disabled = false;
+                li.classList.add('left');
+                div.classList.add('chat-left');
+                ul.appendChild(li);
+                li.appendChild(div);
+            }
+        }
+
+        async function chatbtn() {
+            const chatinput = document.getElementById('chat-input');
+            const inputText = chatinput.value
+            // 自分の質問を入れる
+            await output(inputText, 'me');
+            // テキストボックスを空にする
+            chatinput.value = '';
+
+            // chatgptに接続する
+            await reply(inputText)
+        }
+
+        // APIを取得する
+        async function getApi() {
+            var sql = `select * from apiDetail;`;
+            var apiDetails = await osql.connect(sql);
+            var API_KEY = apiDetails[0].apikey
+            return API_KEY
+        }
+
+        // openAIのURL
+        const URL = "https://api.openai.com/v1/chat/completions";
+        // chatGPTにパラメータとして渡す会話の内容　messagesに対してどんどん蓄積していく
+        let messages = [{
+            role: "system",
+            content: "あなたは学校の先生です。"
+        }]
+
+        async function reply(text) {
+            var API_KEY = await getApi()
+            messages.push({
+                "role": "user",
+                "content": text
+            })
+            try {
+                const response = await axios.post(
+                    URL, {
+                        model: "gpt-3.5-turbo",
+                        messages: messages,
+                        max_tokens: 500,
+                    }, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${API_KEY}`,
+                        },
+                    }
+                );
+                // chatgptの回答
+                var chatgpt_response = response.data.choices[0].message.content;
+                console.log(response)
+                console.log("response.data");
+                console.log(response.data);
+                // レスポンスが生成された日時を取得する・DBに登録する時間にする
+                // var created_at = dateConversion(response.data)
+                // console.log('created_at' + created_at)
+
+                messages.push({
+                    "role": "assistant",
+                    "content": chatgpt_response
+                })
+                console.log("messages")
+                console.log(messages)
+                output(chatgpt_response, 'other');
+
+                // 質問と返信をデータベースに送る
+                await dataToDatabase(messages)
+
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        // userの質問内容とchatgptの返答を取得するために、一度質問するごとに+2していく
+        var userMessageNum = -1;
+        var gptReplyNum = 0;
+        // 質問と返信学籍番号をデータベースに送る
+        async function dataToDatabase(messages) {
+            // user→userMessageNum / chatGPT→gptReplyNum 質問するごとに+2する
+            // 質問1回目 の時　userの質問：messages[1]-contents chatgptの回答：messages[2]-contents
+            //　質問2回目 の時　userの質問：messages[3]-contents chatgptの回答：messages[4]-contents
+            userMessageNum += 2;
+            gptReplyNum += 2;
+            var userQuestion = messages[userMessageNum].content;
+            var gptResponse = messages[gptReplyNum].content;
+            console.log('userQuestion')
+            console.log(userQuestion)
+            console.log('gptResponse')
+            console.log(gptResponse)
+            var studentid = await getUser();
+            console.log("studentid" + studentid)
+            // このSQLエスケープ処理使えない？
+            // const userEscapedString = userQuestion
+            //     .replace(/"/g, '\\"')
+            //     .replace(/'/g, "\\'")
+            //     .replace(/`/g, '\\`')
+            //     .replace(/\n/g, "\\n")
+            //     .replace(/\r/g, "\\r")
+            //     .replace(/\t/g, "\\t");
+            // const gptEscapedString = gptResponse
+            //     .replace(/"/g, '\\"')
+            //     .replace(/'/g, "\\'")
+            //     .replace(/`/g, '\\`')
+            //     .replace(/\n/g, "\\n")
+            //     .replace(/\r/g, "\\r")
+            //     .replace(/\t/g, "\\t");
+            var sql =
+                `insert into contents (sessionid, studentid, question, reply, created_at) values('${sessionid}',
+                '${studentid}', '${userQuestion}', '${gptResponse}', now());`;
+            var objects = await osql.connect(sql);
+        }
+
+        // unixタイム(1687398129)から「2023/6/22 10:42:09」の形に変換する
+        function dateConversion(data) {
+            // 質問時間を取得する
+            let unixtime = data.created
+            // unixタイム(1687398129)から「2023/6/22 10:42:09」の形に変換
+            let created_at = unixToDate(unixtime)
+            return created_at
+        }
+
+        function unixToDate(unixtime) {
+            // Dateがミリ秒なので1000倍が必要
+            let dateTime = new Date(unixtime * 1000);
+            console.log(dateTime.toLocaleString());
+            let jpTime = dateTime.toLocaleString()
+            return jpTime
+        }
+    </script>
+
 </body>
 
 </html>
