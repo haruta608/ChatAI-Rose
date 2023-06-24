@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>F&Q</title>
+    <!-- <script></script> 最初に読み込む用のJSを入れる -->
+
+</head>
+
+<body>
+    <textarea id="request_text" cols="50" rows="5"></textarea>
+    <br />
+    <input type="button" onClick="reply()" value="話しかける" />
+    <br /><br />
+    <textarea id="response_text" cols="50" rows="5" disabled></textarea>
+    <br /><br />
+    <input type="button" onClick="unixToDate(1687398129)" value="日時変換" />
+    <br /><br />
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        const API_KEY = 'APIキー';
+        const URL = "https://api.openai.com/v1/chat/completions";
+
+        async function reply() {
+            let text = document.getElementById("request_text").value;
+            let messages = [{
+                role: "system",
+                content: "あなたは学校の先生です。"
+            }, {
+                role: "user",
+                content: text,
+            }]
+            try {
+                const response = await axios.post(
+                    URL, {
+                        model: "gpt-3.5-turbo",
+                        messages: messages,
+                        max_tokens: 500,
+                    }, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${API_KEY}`,
+                        },
+                    }
+                );
+                var chatgpt_response = response.data.choices[0].message.content;
+                console.log("response.data");
+                console.log(response.data);
+                dataToDatabase(response.data)
+                $("#response_text").val(chatgpt_response);
+                messages.push({
+                    "role": "user",
+                    "content": text
+                })
+                messages.push({
+                    "role": "assistant",
+                    "content": chatgpt_response
+                })
+                console.log("messages")
+                console.log(messages)
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        function dataToDatabase(data) {
+            // 質問時間を取得する
+            let unixtime = data.created
+            // unixタイム(1687398129)から「2023/6/22 10:42:09」の形に変換
+            let created_at = unixToDate(unixtime)
+        }
+
+        function unixToDate(unixtime) {
+            // Dateがミリ秒なので1000倍が必要
+            let dateTime = new Date(unixtime * 1000);
+            console.log(dateTime.toLocaleString());
+            let jpTime = dateTime.toLocaleString()
+            return jpTime
+        }
+    </script>
+</body>
+
+</html>
