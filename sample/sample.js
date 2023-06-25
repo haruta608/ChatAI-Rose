@@ -1,4 +1,63 @@
-function createUuid(){
+var text = '以下は、JavaScriptで「こんにちは」とコンソールに表示するプログラム例です。```console.log("こんにちは");```コンソールに表示される文字は、ダブルクオーテーションで囲む必要があります。また、JavaScriptではプログラムの最後にセミコロンを付けるのが一般的です。```<html>("こんにちは");</html>```'
+
+// こんにちは、生徒さん。
+// 以下は、JSを使って「こんにちは」と表示するプログラムの例です：
+// ```js
+// console.log("こんにちは");
+// ```
+// ブラウザの場合、HTMLファイルに以下のようにscriptタグを書き加えることで「こんにちは」というメッセージを表示できます：
+
+// ```html
+// <!DOCTYPE html>
+// <html>
+//   <head>
+//     <meta charset="UTF-8">
+//     <title>Hello World</title>
+//   </head>
+//   <body>
+//     <p id="greeting"></p>
+//     <script>
+//       document.getElementById("greeting").innerHTML = "こんにちは";
+//     </script>
+//   </body>
+// </html>
+// ```
+
+// このように、JSを使えばブラウザ上で動的なコンテンツを表示することができます。'
+splitCode(text)
+function splitCode(text) {
+            var splitText = text.split('```');
+            var splitCodeText = '';
+    for (var i = 0; i < splitText.length;i++) {
+                if (i % 2 == 0) {
+                    splitCodeText += splitText[i]
+                }
+    }
+    console.log(splitCodeText)
+            return splitCodeText
+        }
+
+function cutCode(str) {
+    // splitにて、回答結果のみ切り取り
+var result = str.split('```');
+ 
+// 結果を表示
+    console.log(result.length)
+    console.log('result')
+    console.log(result);  // ["特異な科目", "英語"]と表示される
+    console.log('result[1]')
+    console.log(result[1]);  // "英語"と表示される
+    console.log(typeof(result[1]))
+    console.log('result[0]')
+    console.log(result[0]); 
+    console.log('result[2]')
+    console.log(result[2]); 
+    console.log('result[3]')
+    console.log(result[3]);
+console.log(typeof(result[3]))    
+}
+
+function createUuid() {
     
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(a) {
       let r = (new Date().getTime() + Math.random() * 16)%16 | 0, v = a == 'x' ? r : (r & 0x3 | 0x8);

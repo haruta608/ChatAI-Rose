@@ -202,8 +202,11 @@
             console.log(userQuestion)
             console.log('gptResponse')
             console.log(gptResponse)
+            console.log(typeof (gptResponse))
             var studentid = await getUser();
             console.log("studentid" + studentid)
+            var userText = await splitCode(userQuestion);
+            var gptText = await splitCode(gptResponse);
             // このSQLエスケープ処理使えない？
             // const userEscapedString = userQuestion
             //     .replace(/"/g, '\\"')
@@ -221,8 +224,20 @@
             //     .replace(/\t/g, "\\t");
             var sql =
                 `insert into contents (sessionid, studentid, question, reply, created_at) values('${sessionid}',
-                '${studentid}', '${userQuestion}', '${gptResponse}', now());`;
+                '${studentid}', '${userText}', '${gptText}', now());`;
             var objects = await osql.connect(sql);
+        }
+
+        // コードの部分を切り取ってreturnする（コードをDBに登録する方法が分からないため）
+        async function splitCode(text) {
+            var splitText = text.split('```');
+            var splitCodeText = '';
+            for (var i = 0; i < splitText.length; i++) {
+                if (i % 2 == 0) {
+                    splitCodeText += splitText[i]
+                }
+            }
+            return splitCodeText
         }
 
         // unixタイム(1687398129)から「2023/6/22 10:42:09」の形に変換する
