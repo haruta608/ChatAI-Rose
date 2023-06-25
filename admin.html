@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>admin</title>
+    <script type="text/javascript" src="lib/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/osql.js"></script>
+    <script>
+        osql.requireLogin();
+        $(document).ready(function () {
+            getData();
+        });
+
+        async function getData() {
+            var sql = `select users.name, contents.question, contents.reply, contents.created_at from contents inner
+            join users on users.studentid = contents.studentid where contents.id not in (7) order by created_at desc;`;
+            var objects = await osql.connect(sql);
+            console.log(objects)
+            var html = '';
+            html = html + '<table border="1"><tr><td>名前</td><td>質問</td><td>返答</td><td>時間</td></tr>';
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                html = html + '<tr>';
+                html = html + '<td>' + object.name + '</td>';
+                html = html + '<td>' + object.question + '</td>';
+                html = html + '<td>' + object.reply + '</td>';
+                html = html + '<td>' + object.created_at + '</td>';
+                html = html + '</tr>';
+            }
+            html = html + '</table>';
+            document.getElementById('result').innerHTML = html;
+        }
+    </script>
+</head>
+
+<body>
+    <h1>管理画面</h1>
+
+    <p id="result">xxxx</p>
+</body>
+
+</html>
