@@ -3,12 +3,15 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>chatBot</title>
+    <title>chat</title>
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/osql.js"></script>
     <script>
         osql.requireLogin();
+        $().ready(function () {
+            login()
+        });
 
         async function login() {
             var me = await osql.getMe();
