@@ -25,17 +25,30 @@
 </head>
 
 <body>
-    <h1>チャット画面</h1>
 
-    <!--画面-->
-    <div id="field">
-        <ul id="chat-ul"></ul>
+    <div id="start">
+        <button id="modalOpen" class="input-start">チャット開始</button>
     </div>
 
-    <!--入力場所，送信ボタン-->
-    <div id="input-field">
-        <textarea id="chat-input" cols="50" rows="5"></textarea>
-        <input type="button" value="Send" id="chat-button" onclick="chatbtn()">
+    <!--画面-->
+    <div id="easyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1>チャット画面</h1>
+                <span class="modalClose">×</span>
+            </div>
+            <div class="modal-body">
+                <div id="field">
+                    <ul id="chat-ul"></ul>
+                </div>
+
+                <!--入力場所，送信ボタン-->
+                <div id="input-field">
+                    <textarea id="chat-input" cols="50" rows="5"></textarea>
+                    <input type="button" value="Send" id="chat-button" onclick="chatbtn()">
+                </div>
+            </div>
+        </div>
     </div>
 
 
@@ -77,6 +90,7 @@
             const div = document.createElement('div');
             console.log(text)
             // ```の間を取得してコードブロックにする。できていない
+
             // const codeRegex = /```([\s\S]+?)```/;
             // const matches = text.match(codeRegex);
 
@@ -105,10 +119,19 @@
                 ul.appendChild(li);
                 li.appendChild(div);
             } else if (person === 'other') {
-                // chatBtn.disabled = true;
-                // chatBtn.disabled = false;
                 li.classList.add('left');
                 div.classList.add('chat-left');
+                // var splitText = text.split('```');
+                // for (var i = 0; i < splitText.length; i++) {
+                //     const codeBlock = document.createElement('pre');
+                //     if (i %
+                //         2 == 1) {
+                //         codeBlock.textContent = splitText[i];
+                //         li.appendChild(codeBlock);
+                //     }
+                // }
+                // chatBtn.disabled = true;
+                // chatBtn.disabled = false;
                 ul.appendChild(li);
                 li.appendChild(div);
             }
@@ -137,10 +160,24 @@
         // openAIのURL
         const URL = "https://api.openai.com/v1/chat/completions";
         // chatGPTにパラメータとして渡す会話の内容　messagesに対してどんどん蓄積していく
+        const content = [
+            "あなたはプログラミング学習の経験のない大学1年生にjsを教える教師です。文法エラーとアルゴリズムでつまづいている生徒にそれぞれ異なった返答をしてください。",
+            "文法エラーの質問に対しては以下のように返答してください。[修正後のコード]",
+            "修正箇所： 〇〇を△△ に変更",
+            "説明： なぜ間違っていたのか説明",
+
+            "アルゴリズムの質問に対しては以下のように返答してください。",
+            "1. 問題の解決に必要な要素や考え方を明確に指示する。",
+            "2. 具体的なコードや回答は絶対に提供せず、 アルゴリズムやアプローチのヒントを与える。",
+            "3. 解答者が問題を自力で解決できるように、 適切な手助けを行う。 "
+        ].join('\n');
+        console.log("content");
+        console.log(content);
         let messages = [{
             role: "system",
-            content: "あなたは学校の先生です。"
+            content: content
         }]
+        console.log(messages);
 
         async function reply(text) {
             var API_KEY = await getApi()
@@ -255,6 +292,34 @@
             console.log(dateTime.toLocaleString());
             let jpTime = dateTime.toLocaleString()
             return jpTime
+        }
+
+        // モーダル画面の表示
+        const buttonOpen = document.getElementById('modalOpen');
+        const modal = document.getElementById('easyModal');
+        const buttonClose = document.getElementsByClassName('modalClose')[0];
+
+        // ボタンがクリックされた時
+        buttonOpen.addEventListener('click', modalOpen);
+
+        function modalOpen() {
+            modal.style.display = 'block';
+        }
+
+        // バツ印がクリックされた時
+        buttonClose.addEventListener('click', modalClose);
+
+        function modalClose() {
+            modal.style.display = 'none';
+        }
+
+        // モーダルコンテンツ以外がクリックされた時
+        addEventListener('click', outsideClose);
+
+        function outsideClose(e) {
+            if (e.target == modal) {
+                modal.style.display = 'none';
+            }
         }
     </script>
 
