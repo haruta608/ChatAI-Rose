@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会話履歴</title>
+    <script type="text/javascript" src="lib/jquery.min.js"></script>
+    <script type="text/javascript" src="lib/osql.js"></script>
+    <script>
+        osql.requireLogin();
+        $(document).ready(function () {
+            getData();
+        });
+        async function getStudentId() {
+            var me = await osql.getMe();
+            console.log(me);
+            var studentid = me.studentid;
+            return studentid
+        }
+
+        async function getData() {
+            var studentid = await getStudentId()
+            var sql = `select
+            contents.sessionid
+            from
+            contents
+            inner join
+            users
+            on users.studentid = contents.studentid
+            where users.studentid = '${studentid}'
+            Group by contents. sessionid`;
+            var objects = await osql.connect(sql);
+            console.log(objects)
+            var html = '';
+            html = html + '<ul>';
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                console.log(object.sessionid)
+                html = html +
+                    `<li><a href="individualHistory.html?sessionid=${object.sessionid}">${object.sessionid}</a></li>`;
+            }
+            html = html + '</ul>';
+            document.getElementById('result').innerHTML = html;
+        }
+    </script>
+</head>
+
+<body>
+    <h1>会話履歴</h1>
+
+    <p id="result">xxxx</p>
+
+</body>
+
+</html>

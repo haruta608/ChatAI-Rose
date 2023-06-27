@@ -13,6 +13,11 @@ p {
     white-space: pre-wrap;
 }
 
+#history-link-wrap {
+    margin-top: 20px;
+    margin-left: 10px;
+}
+
 
 #field {
     width: 80%;
