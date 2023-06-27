@@ -200,10 +200,20 @@
                 })
                 console.log("messages")
                 console.log(messages)
+                const memorySize = 7;
+                var nowMessegeNum = messages.length
+                console.log("messages.length" + nowMessegeNum)
+                // messagesの中身が７個だったら最初の履歴を消す
+                if (nowMessegeNum == memorySize) {
+                    messages.splice(1, 2);
+                    // Inserts at index 1
+                    console.log("ifの中身messages");
+                    console.log(messages);
+                }
                 output(chatgpt_response, 'other');
 
                 // 質問と返信をデータベースに送る
-                await dataToDatabase(messages)
+                await dataToDatabase(nowMessegeNum, messages)
 
             } catch (error) {
                 console.log(error);
@@ -214,7 +224,11 @@
         var userMessageNum = -1;
         var gptReplyNum = 0;
         // 質問と返信学籍番号をデータベースに送る
-        async function dataToDatabase(messages) {
+        async function dataToDatabase(nowMessegeNum, messages) {
+            if (nowMessegeNum == 7) {
+                userMessageNum = 1;
+                gptReplyNum = 2;
+            }
             // user→userMessageNum / chatGPT→gptReplyNum 質問するごとに+2する
             // 質問1回目 の時　userの質問：messages[1]-contents chatgptの回答：messages[2]-contents
             //　質問2回目 の時　userの質問：messages[3]-contents chatgptの回答：messages[4]-contents
