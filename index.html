@@ -75,30 +75,13 @@
             const li = document.createElement('li');
 
             const div = document.createElement('div');
-            console.log(text)
-            // ```の間を取得してコードブロックにする。できていない
-
-            // const codeRegex = /```([\s\S]+?)```/;
-            // const matches = text.match(codeRegex);
-
-            // if (matches) {
-            //     const codeBlock = matches[1];
-            //     const startIndex = matches.index;
-            //     const endIndex = startIndex + matches[0].length;
-            //     const beforeText = text.substring(0, startIndex);
-            //     const afterText = text.substring(endIndex);
-
-            //     console.log("コードブロックの前のテキスト:");
-            //     console.log(beforeText);
-            //     console.log("コードブロック:");
-            //     console.log(codeBlock);
-            //     console.log("コードブロックの後のテキスト:");
-            //     console.log(afterText);
-            //     div.textContent = beforeText + codeBlock + afterText;
-            // } else {
-            //     div.textContent = text;
-            // }
-            div.textContent = text;
+            // コードタグとpreタグで返答をわかりやすくする
+            const code = document.createElement('code');
+            const pre = document.createElement('pre');
+            code.textContent = text;
+            div.appendChild(pre);
+            pre.appendChild(code);
+            code.textContent = text;
 
             if (person === 'me') {
                 div.classList.add('chat-right');
@@ -108,22 +91,10 @@
             } else if (person === 'other') {
                 li.classList.add('left');
                 div.classList.add('chat-left');
-                // var splitText = text.split('```');
-                // for (var i = 0; i < splitText.length; i++) {
-                //     const codeBlock = document.createElement('pre');
-                //     if (i %
-                //         2 == 1) {
-                //         codeBlock.textContent = splitText[i];
-                //         li.appendChild(codeBlock);
-                //     }
-                // }
-                // chatBtn.disabled = true;
-                // chatBtn.disabled = false;
                 ul.appendChild(li);
                 li.appendChild(div);
             }
         }
-
         async function chatbtn() {
             const chatinput = document.getElementById('chat-input');
             const inputText = chatinput.value
