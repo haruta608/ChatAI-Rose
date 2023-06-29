@@ -52,6 +52,7 @@
                 ul.appendChild(li);
                 li.appendChild(div);
             }
+
         }
 
         async function chatbtn() {
@@ -64,6 +65,7 @@
 
             // chatgptに接続する
             await reply(inputText)
+
         }
         async function reply(inputText) {
             var text =
@@ -73,41 +75,5 @@
     </script>
 
 </body>
-
-<!-- テスト -->
-
-<!-- <body>
-
-    <textarea id="request_text" cols="100" rows="10">
-</textarea>
-    <br />
-    <input type="button" onClick="reply()" value="話しかける" />
-    <br /><br />
-    <textarea id="response_text" cols="100" rows="10" disabled>
-</textarea> -->
-<!-- <div class="chat-body">
-        <div id="field">
-            <ul id="chat-ul"></ul>
-        </div>
-    </div> -->
-
-
-<!-- <div id="list">
-
-    </div>
-    <div class="codeBlock"></div>
-
-
-    <div class="wrapper">
-        <p id="text">この文章がコピーされます。</p>
-        <button id="button">COPY!</button>
-    </div>
-
-
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
-
-    <script src="sample.js"></script>
-</body> -->
 
 </html>
